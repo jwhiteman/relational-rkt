@@ -10,30 +10,25 @@
 
 (defrel (cdro l v)
         (fresh (d)
-               (== (cons d v) l)
-               (and (print `("cdro! " ,l ,v)) succeed)))
+               (== (cons d v) l)))
 
 (defrel (nullo l)
-        (== l '())
-        (and (print `("nullo! " ,l)) succeed))
+        (== l '()))
 
 (defrel (debug)
         (and (print "made it") succeed))
 
 ;; LISTO
 (defrel (listo l)
-        (and (print `("listo! " ,l)) succeed)
         (conde
           ((nullo l))
           ((fresh (d)
-                  (debug)
-                  (cdro l d)  ;; is this halting here at failure, or success?
-                  (debug)
+                  (cdro l d)
                   (listo d)))))
 
 (run 1 x (listo `(a b c . ,x)))
-(run 2 x (listo `(a b c . ,x)))
-(run 3 zebra (listo `(a b c . ,zebra)))
+(run 5 x (listo `(a b c . ,x)))
+(run 5 zebra (listo `(a b c . ,zebra)))
 
 ;; scratch...
 (run 1 x

@@ -26,6 +26,9 @@
       (else #f))))
 
 (define (unify u v s)
+  ;;(display "\n")
+  ;;(print `(,u ,v ,s))
+  ;;(display "\n")
   (let ((u (walk u s)) (v (walk v s)))
     (cond
       ((eqv? u v) s)
