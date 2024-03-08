@@ -20,7 +20,7 @@
   (let ((v (walk v s)))
     (cond
       ((var? v) (eqv? v x))
-      ((pair? v) 
+      ((pair? v)
        (or (occurs? x (car v) s)
            (occurs? x (cdr v) s)))
       (else #f))))
