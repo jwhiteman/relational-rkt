@@ -1,13 +1,16 @@
-- is fusing bidirectional?
-- will ext-s, by itself, allow #(v) -> 'y when s contains #(v) -> 'x ?
-- ...could you unify #(v) -> 'y with the same s?
-
 ;; these first two are the same
 (let ((v (var 'v)))
   (unify v 'y '()))
 
 (let ((v (var 'v)))
   (unify 'y v '()))
+
+;; walk: return non-var or var not on key-side of bindings
+;; let's say we have A -> B -> nothing
+;; if A later -> 'x, the lookup (if things are working correctly)
+;; will go A => B -> 'x, so bidirectionality shouldn't matter
+(walk '(a b c) '())                ;; => '(a b c)
+(unify '(a b c) '(a b c) '(1 . 2)) ;; just gives S bac
 
 ;; these two end up being different:
 ;; so i'm not sure how var fusing works, exactly
