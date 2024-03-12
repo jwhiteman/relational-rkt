@@ -26,10 +26,10 @@
 ;; 3. v is a var, and a key, but the value is not a pair
 (define walk ;; [3]
   (lambda (v bindings)
-    (let ((a (var? v) (assv v bindings))) ;; is v a var that is a key?
-      (if (and a (pair? a))               ;; ...and is it a pair?
-        (walk (cdr a) bindings)           ;; ...recur with the cdr
-        v))))                             ;; no? we're at terminal meaning
+    (let ((a (and (var? v) (assv v bindings)))) ;; is v a var that is a key?
+      (if (and a (pair? a))                     ;; ...and is it a pair?
+        (walk (cdr a) bindings)                 ;; ...recur with the cdr
+        v))))                                   ;; no? we're at terminal meaning
 
 ;; macro idea: combination of let* and #'and
 
@@ -70,7 +70,7 @@
       ((var? l) (ext-s l r bindings))
       ((var? r) (ext-s r l bindings))
       ((and (pair? l) (pair? r))
-       (let ((bindings (unify (car l) (car r))))
+       (let ((bindings (unify (car l) (car r) bindings)))
          (and bindings
               (unify (cdr l) (cdr r) bindings))))
       (else #f))))
