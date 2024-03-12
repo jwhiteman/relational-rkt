@@ -1,5 +1,6 @@
 ;;; Copyright © 2018 Daniel P. Friedman, William E. Byrd, Oleg Kiselyov, and Jason Hemann
 
+;; COURSE 1
 (define var (lambda (x) (vector x)))
 (define var? (lambda (x) (vector? x)))
 
@@ -26,9 +27,6 @@
       (else #f))))
 
 (define (unify u v s)
-  ;;(display "\n")
-  ;;(print `(,u ,v ,s))
-  ;;(display "\n")
   (let ((u (walk u s)) (v (walk v s)))
     (cond
       ((eqv? u v) s)
@@ -40,6 +38,7 @@
               (unify (cdr u) (cdr v) s))))
       (else #f))))
 
+;; COURSE 2
 (define (== u v)
   (lambda (s)
     (let ((s (unify u v s)))
@@ -53,6 +52,7 @@
   (lambda (s)
     '()))
 
+;; COURSE 3
 (define (disj2 g1 g2)
   (lambda (s)
     (append-inf (g1 s) (g2 s))))
@@ -60,22 +60,23 @@
 (define (append-inf s-inf t-inf)
   (cond
     ((null? s-inf) t-inf)
-    ((pair? s-inf) 
+    ((pair? s-inf)
      (cons (car s-inf)
            (append-inf (cdr s-inf) t-inf)))
-    (else (lambda () 
+    (else (lambda ()
             (append-inf t-inf (s-inf))))))
 
 (define (take-inf n s-inf)
   (cond
     ((and n (zero? n)) '())
     ((null? s-inf) '())
-    ((pair? s-inf) 
+    ((pair? s-inf)
      (cons (car s-inf)
            (take-inf (and n (sub1 n))
                      (cdr s-inf))))
     (else (take-inf n (s-inf)))))
 
+;; COURSE 4
 (define (conj2 g1 g2)
   (lambda (s)
     (append-map-inf g2 (g1 s))))
@@ -89,6 +90,7 @@
     (else (lambda () 
             (append-map-inf g (s-inf))))))
 
+;; COURSE 5
 (define (call/fresh name f)
   (f (var name)))
 
@@ -107,7 +109,6 @@
          (walk* (cdr v) s)))
       (else v))))
 
-; 'project' is defined in the frame 10:98 on page 166.
 (define-syntax project
   (syntax-rules ()
     ((project (x ...) g ...)
@@ -136,6 +137,7 @@
 (define (run-goal n g)
   (take-inf n (g empty-s)))
 
+;; COURSE 6
 (define (ifte g1 g2 g3)
   (lambda (s)
     (let loop ((s-inf (g1 s)))
@@ -157,7 +159,7 @@
                 (loop (s-inf))))))))
 
 
-;;; Here are the key parts of Appendix A
+;;; CONNECTING THE WIRES
 
 (define-syntax disj
   (syntax-rules ()
