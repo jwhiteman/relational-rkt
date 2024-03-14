@@ -67,3 +67,93 @@
       (if s
         `(,s)
         '()))))
+
+;; COURSE 3
+(define empty-s '())
+
+(define (disj2 g1 g2)
+  (lambda (s)
+    (append-inf (g1 s) (g2 s))))
+
+(define (append-inf s-inf t-inf)
+  (cond
+    ((null? s-inf) t-inf)
+    ((pair? s-inf)
+     (cons (car s-inf)
+           (append-inf (cdr s-inf) t-inf)))
+    (else (lambda ()
+            (append-inf t-inf (s-inf))))))
+
+(define (nevero)
+  (lambda (s)
+    (lambda ()
+      ((nevero) s))))
+
+((nevero) empty-s)
+
+((== 'olive (var 'x)) empty-s)
+;; '( ((#(x) . olive)) ) ;; a _list_ of bindings, length 1
+;; car => '((#(x) . olive))
+;; cdr => '()
+
+(let ((s-inf ((disj2
+                (== 'olive (var 'x))
+                (nevero))
+              empty-s)))
+  s-inf)
+;; => '(((#(x) . olive)) . #<procedure>)
+
+(let ((s-inf ((disj2
+                (nevero)
+                (== 'olive (var 'x)))
+              empty-s)))
+  s-inf) ;; try (s-inf)
+
+;; => #<procedure>
+
+
+(define (alwayso)
+  (lambda (s)
+    (lambda ()
+      ((disj2 succeed (alwayso)) s))))
+
+(let ((s-inf (((alwayso) empty-s))))
+  (cons (car s-inf) '()))
+
+(let ((s-inf (((alwayso) empty-s))))
+  (cons (car s-inf)
+        (let ((s-inf (((alwayso) empty-s))))
+          (cons (car s-inf) '()))))
+
+(let ((s-inf (((alwayso) empty-s))))
+  (cons (car s-inf)
+        (let ((s-inf (((alwayso) empty-s))))
+          (cons (car s-inf)
+                (let ((s-inf (((alwayso) empty-s))))
+                  (cons (car s-inf) '()))))))
+
+(define (take-inf n s-inf) ;; merge streams
+  (cond
+    ((and n (zero? n)) '())
+    ((null? s-inf) '())
+    ((pair? s-inf)
+     (cons (car s-inf)
+           (take-inf (and n (sub1 n))
+                     (cdr s-inf))))
+    (else
+      (take-inf n (s-inf)))))
+
+(take-inf 1 ((nevero) empty-s)) ;; never returns
+(take-inf #f ((alwayso) empty-s)) ;; never returns
+
+(let  ((k (length
+            (take-inf 5
+                      ((disj2 (== 'olive (var 'x)) (== 'oil (var 'x)))
+                       empty-s)))))
+  `(Found ,k not 5 subtitutions)) ;; Found 2 not 5 substitutions
+
+(map length
+     (take-inf 5
+               ((disj2 (== 'olive (var 'x))
+                       (== 'oil (var 'x)))
+                empty-s))) ;; (1 1)
