@@ -50,6 +50,9 @@
   (cdr (assv v (unify v '(a b c) '()))))
 (let ((v (var 'v)))
   (cdr (assv v (unify v 42 '()))))
+;; 3
+(let ((v (var 'v)))
+  (unify '(a b c) v '()))
 
 (cdr (assv 'x '((a 1) (b 2) (x 3) (z 9))))
 ;; 4
@@ -68,3 +71,11 @@
 (run* (x y z)
       (== z 42)
       (== `(,x b c) `(,z b ,y)))
+
+
+;; *** TAKE-INF: (needs always-o)
+(take-inf 2 (cons 1 (cons 2 (cons 3 (lambda () (cons 4 (cons 5 (cons 6 '()))))  ))))
+(take-inf 5 (cons 1 (cons 2 (cons 3 (lambda () (cons 4 (cons 5 (cons 6 '()))))  ))))
+
+(take-inf 3 ((always-o) empty-s)) ;; '(() () ())
+(take-inf 7 ((always-o) empty-s)) ;; '(() () () () () () ())

@@ -132,6 +132,7 @@
                 (let ((s-inf (((alwayso) empty-s))))
                   (cons (car s-inf) '()))))))
 
+;; like take, but can iterate through suspensions
 (define (take-inf n s-inf) ;; merge streams
   (cond
     ((and n (zero? n)) '())
@@ -142,6 +143,8 @@
                      (cdr s-inf))))
     (else
       (take-inf n (s-inf)))))
+
+(cons 1 (cons 2 (cons 3 (lambda () (cons 4 (cons 5 (cons 6 '()))))  )))
 
 (take-inf 1 ((nevero) empty-s)) ;; never returns
 (take-inf #f ((alwayso) empty-s)) ;; never returns
