@@ -155,3 +155,49 @@
 ;; but this isn't returned to the client;
 ;; but goals can produce suspensions that can produce still more suspensions
 ;; to what degree do suspensions, via their closures, represent backtracking?
+
+
+;; 1: uno
+(let ((v (var 'x))
+      (s empty-s))
+  ((disj2 (== v 'tea)
+          (== v 'cup))
+   s))
+
+;; 2: dos
+(let* ((v (var 'x))
+       (s `((,v . 'p1pz))))
+  ((disj2 (== v 'tea)
+          (== v 'cup))
+   s))
+
+
+(define (conj2 g1 g2)
+  (lambda (s)
+    (append-map-inf g2 (g1 s))))
+
+(define (append-map-inf g s-inf)
+  (cond
+    ((null? s-inf) '())
+    ((pair? s-inf)
+     (append-inf (g (car s-inf))
+                 (append-map-inf g (cdr s-inf))))
+    (else (lambda () 
+            (append-map-inf g (s-inf))))))
+
+;; tres
+(let ((v (var 'x))
+      (s empty-s))
+  ((conj2 (== v 'tea)
+          (== v 'cup))
+   s))
+
+;; cuatro
+(let ((v (var 'v))
+      (w (var 'w))
+      (s empty-s))
+  ((conj2 (== v 'tea)
+          (== w 'cup))
+   s))
+
+;; question: can a stream ever be fed to a goal?
