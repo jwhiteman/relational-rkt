@@ -201,3 +201,121 @@
    s))
 
 ;; question: can a stream ever be fed to a goal?
+
+;; COURSE 5:
+
+;; apply the passed f to the var'd name:
+(define (call/fresh name f)
+  (f (var name)))
+
+(call/fresh 'x
+            (lambda (v)
+              (print "made it!")))
+
+;; num -> string -> symbol:
+(define (reify-name n)
+  (string->symbol
+    (string-append "_"
+                   (number->string n))))
+
+(reify-name 42)
+
+;; walk it. is it a pair? create a new pair from walking both parts of the
+;; current.
+(define (walk* v s)
+  (let ((v (walk v s)))
+    (if (pair? v)
+       (cons
+         (walk* (car v) s)
+         (walk* (cdr v) s))
+       v)))
+
+(let* ((w (var 'w))
+       (x (var 'x))
+       (y (var 'y))
+       (z (var 'z))
+       (s `((,x . b) (,z . ,y) (,w . (,x e ,z)))))
+  (walk w s))
+
+(let* ((w (var 'w))
+       (x (var 'x))
+       (y (var 'y))
+       (z (var 'z))
+       (s `((,x . b) (,z . ,y) (,w . (,x e ,z)))))
+  (walk* w s))
+
+(define (reify-s v r)
+  (let ((v (walk v r)))
+    (cond
+      ((var? v)
+       (let* ((n  (length r))
+              (rn (reify-name n)))
+         (cons `(,v . ,rn) r)))
+      ((pair? v)
+       (let ((r (reify-s (car v) r)))
+         (reify-s (cdr v) r)))
+      (else r))))
+
+(define (reify v)
+  (lambda (s)
+    (let* ((v (walk* v s))
+           (r (reify-s v empty-s)))
+      (walk* v r))))
+
+(let* ((u   (var 'u))
+       (v   (var 'v))
+       (w   (var 'w))
+       (x   (var 'x))
+       (y   (var 'y))
+       (z   (var 'z))
+       (a1 `(,x . (,u ,w ,y ,z ((ice) ,z))))
+       (a2 `(,y . corn))
+       (a3 `(,w . (,v ,u)))
+       (s  `(,a1 ,a2 ,a3)))
+  ((reify x) s))
+;; => '(_0 (_1 _0) corn _2 ((ice) _2))
+
+(let* ((u   (var 'u))
+       (v   (var 'v))
+       (w   (var 'w))
+       (x   (var 'x))
+       (y   (var 'y))
+       (z   (var 'z))
+       (a1 `(,x . (,u ,w ,y ,z ((ice) ,z))))
+       (a2 `(,y . corn))
+       (a3 `(,w . (,v ,u)))
+       (s  `(,a1 ,a2 ,a3)))
+  (reify-s x s))
+
+;; 1. for a given var & a given substitution
+;; 2. walk the var, through its pair if it refers to one
+;;    note: the result of this, is not a substituion;
+;;    but terminal-meaning, and for all its contained values.
+;; 3. |> create a reifed-name substitution
+;;    i.e create a lookup w/ var => _n
+;; 4. take the meaning and replace all vars with the values of the lookup ^
+(let* ((u   (var 'u))
+       (v   (var 'v))
+       (w   (var 'w))
+       (x   (var 'x))
+       (y   (var 'y))
+       (z   (var 'z))
+       (a1 `(,x . (,u ,w ,y ,z ((ice) ,z))))
+       (a2 `(,y . corn))
+       (a3 `(,w . (,v ,u)))
+       (s  `(,a1 ,a2 ,a3)))
+  (reify-s (walk* x s) empty-s))
+;;       x     =>  (,u ,w ,y ,z ((ice) ,z)))
+;; walk* x s   => '(#(u) (#(v) #(u)) corn #(z) ((ice) #(z)))
+;; |> reify-s  => '((#(z) . _2) (#(v) . _1) (#(u) . _0))
+;;             => '(_0 (_1 _0) corn _2 ((ice) _2))
+
+(let ((x (var 'x)))
+  (map (reify x)
+       (take-inf 5
+                 ((disj2 (== 'olive x) (== 'oil x))
+                  empty-s))))
+;; => '(olive oil)
+
+(define (run-goal n g)
+  (take-inf n (g empty-s)))
