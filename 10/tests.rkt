@@ -46,10 +46,6 @@
 ;; 2
 (let ((v (var 'v)))
   (unify v '(a b c) '()))
-(let ((v (var 'v)))
-  (cdr (assv v (unify v '(a b c) '()))))
-(let ((v (var 'v)))
-  (cdr (assv v (unify v 42 '()))))
 ;; 3
 (let ((v (var 'v)))
   (unify '(a b c) v '()))
@@ -67,6 +63,12 @@
        (z (var 'z))
        (s `(,z . 42)))
   ((== `(,x b c) `(,z b ,y)) `(,s)))
+
+(let* ((x (var 'x))
+       (y (var 'y))
+       (z (var 'z))
+       (s `(,z . 42)))
+  ((== `(,x B c) `(,z b ,y)) `(,s)))
 
 (run* (x y z)
       (== z 42)
