@@ -81,3 +81,12 @@
 
 (take-inf 3 ((always-o) empty-s)) ;; '(() () ())
 (take-inf 7 ((always-o) empty-s)) ;; '(() () () () () () ())
+
+;; reify-s
+(let ((x (var 'x))
+      (y (var 'y))
+      (z (var 'z)))
+  (reify-s `((,x . ,z) (,z . 42) (,y . '(a b c))) empty-s))
+
+(let ((v (var 'v)))
+  (reify-s v empty-s))
