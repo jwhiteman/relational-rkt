@@ -71,3 +71,8 @@
 
 ;; hypothesis 1: via the macros, you're never not using either conj2 or disj2
 ;;   ...conda/i/u ?
+
+;; 3 mysteries:
+;; - how the macros work
+;; - goals are aggregated, but the input type (s) is different than the output type (stream)
+;; - suspensions
