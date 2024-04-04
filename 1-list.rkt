@@ -152,7 +152,7 @@
 ;;     - ({x: olive})
 ;;     - append: (()) ({x: oil})                 => ({}, {x: oil})
 ;; append (), ({x: olive}, {}, {x: oil})         => ({x: olive}, {}, {x: oil})
-;; map w/ (reify x)                              => (olive _0 oil)
+;; map w/ (reify x)                              => (olive ,x oil) => (olive _0 oil)
 (run* x
   (disj2
     (conj2 (== 'virgin x) fail)
@@ -162,6 +162,7 @@
                        (== 'oil x)))))
 
 ;; 17
+;; '(split pea)
 (run* r
   (fresh (x)
     (fresh (y) (conj2
@@ -170,6 +171,7 @@
                                   (== `(,x ,y) r))))))
 
 ;; 18
+;; ditto
 (run* r
   (fresh (x)
     (fresh (y) (conj2
@@ -177,12 +179,14 @@
                  (== `(,x ,y) r)))))
 
 ;; 19
+;; (split pea) (red bean)
 (run* (x y) ;; which macro is this using?
   (disj2
     (conj2 (== 'split x) (== 'pea y))
     (conj2 (== 'red x) (== 'bean y))))
 
 ;; 20
+;; (split pea soup) (red bean soup)
 (run* r
   (fresh (x y)
     (conj2 (disj2
@@ -198,28 +202,47 @@
                         ((disj2 (== 'tea t) (== 'cup t))
                          s))))
 
+;; 21
+;; ({x: tea}, {x: cup}) => ({x: tea, y: true}, {x: cup, y: true}, {x: false, y: true})
+;; => ((tea true) (cup true) (false true))
 (run* (x y)
   (disj2
     (conj2 (teacupo x) (== #t y))
     (conj2 (== #f x) (== #t y))))
 
+;; 22
+;; ({x: tea}, {x: cup})
+;; x:tea, y:tea | x:tea, y:cup | x:cup, y:tea | x:cup, y:cup
+;; ((tea tea) (tea cup) (cup tea) (cup cup))
+;; conj2 -> cross product?
 (run* (x y)
   (teacupo x)
   (teacupo y))
 
+;; 23
+;; ({x: tea} {x: cup}) => ((tea _0) (cup _0))
+;; ({x: tea} {x: cup})
 (run* (x y)
   (teacupo x)
   (teacupo x))
 
+;; 24
 (run* (x y)
   (disj2
-    (conj2 (teacupo x) (teacupo x))
-    (conj2 (== #f x) (teacupo y))))
+    (conj2 (teacupo x) (teacupo x))  ;; (x:tea) (x:cup)
+    (conj2 (== #f x) (teacupo y))))  ;; (x:#f y:tea) (x:#f y:cup)
+                                     ;; (tea _0) (cup _0) (#f tea) (#f cup)
 
+;; 25
 (run* (x y) (conde
-              ((fresh (z) (== 'lentil z))) ((== x y))))
+              ((fresh (z) (== 'lentil z)))  ;;  ({z: lentil})
+              ((== x y))))                  ;;  ({x: y})
+                                            ;;  ({z: lentil}, {x: y})
+                                            ;;  (_0 _1)       (y, y) =>> (0 0)
 
+;; 26
 (run* (x y) (conde
               ((== 'split x) (== 'pea y))
-              ((== 'red x) (== 'bean y))
+              ((== 'red x)   (== 'bean y))
               ((== 'green x) (== 'lentil y))))
+;; (split pea) (red bean) (green lentil)
