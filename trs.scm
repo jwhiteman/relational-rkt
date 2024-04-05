@@ -160,7 +160,6 @@
 
 
 ;;; CONNECTING THE WIRES
-
 (define-syntax disj
   (syntax-rules ()
     ((disj) fail)
