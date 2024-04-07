@@ -1,59 +1,112 @@
 (load "trs.scm")
 
-;; CARO:
-(defrel (caro l v)
-        (fresh (_)
-               (== (cons v _) l)))
+;; caro
+(defrel (caro l h)
+        (fresh (t)
+          (== (cons h t) l)))
+
+;; cdro
+(defrel (cdro l t) 
+        (fresh (h)
+          (== (cons h t) l)))
+
+;; conso
+(defrel (conso h t l)
+        (caro l h)
+        (cdro l t))
 
 (run* r
-  (caro '(x y z) r))
-(run* l
-  (caro l 'z))
+  (fresh (x y)
+    (caro '(grape raisin pear) x)
+    (caro '((a) (b) (c)) y)
+    (== (cons x y) r)))
 
-;; CDRO:
-(defrel (cdro l v)
-        (fresh (d)
-               (== (cons d v) l)))
-
-(run* r
-  (cdro '(x y z) r))
-(run* l
-  (cdro l '(a b)))
-
-;; CONSO:
-;; "the head of the thing on the left is the head of the thing on the right,
-;;  and the rest of the thing on the left is the rest of the thing on the right"
-(defrel (conso e l v)
-        (== `(,e . ,l) v))
-(run* l
-  (conso 'x '(y z) l))
-(run* l
-  (conso l '(y z) '(x y z)))
-(run* l
-      (conso 'x l '(x y z)))
-
-
-;; define caro using conso
-;; "the head of the thing on the left is the thing on the right"
-'(a b c) x
-x        '(a b c)
-`(,l b c) 'q
-
-(defrel (car-o l v)
-        (fresh (d)
-               (conso v d l)))
-(run* r
-  (car-o '(x y z) r))
-(run* l
-  (car-o l 'z))
-
-;; define cdro using conso
-;; "the rest of the thing on the left is the thing on the right"
-(defrel (cdr-o l v)
-        (fresh (d)
-               (conso d v l)))
+;; ()
+;; (#(t-385) raisin pear) (#(x-207) . grape)
+;; (#(t-988) (b) (c)) (#(y-847) a) (#(t-385) raisin pear) (#(x-207) . grape)
+;; (#(r) #(x-207) . #(y-847)) (#(t-988) (b) (c)) (#(y-847) a) (#(t-385) raisin pear) (#(x-207) . grape)
 
 (run* r
-  (cdr-o '(x y z) r))
+  (fresh (v)
+    (cdro '(a c o r n) v)
+    (fresh (w)
+      (cdro v w)
+      (caro w r))))
+
+;; ()
+;; (#(v-607) c o r n) (#(h-230) . a)
+;; (#(w-86) o r n) (#(h-294) . c) (#(v-607) c o r n) (#(h-230) . a)
+;; (#(t-624) r n) (#(r) . o) (#(w-86) o r n) (#(h-294) . c) (#(v-607) c o r n) (#(h-230) . a)
+
 (run* l
-  (cdr-o l '(a b)))
+  (fresh (d t x y w)
+    (conso w '(n u s) t)
+    (cdro l t)
+    (caro l x)
+    (== 'b x)
+    (cdro l d)
+    (caro d y)
+    (== 'o y)))
+
+()
+
+(#(t-784) #(w-124) . #(t-266))
+
+(#(t-266) n u s)
+  (#(h-820) . #(w-124))
+  (#(t-784) #(w-124) . #(t-266))
+
+(#(l) #(h-8) . #(t-784))
+  (#(t-266) n u s)
+  (#(h-820) . #(w-124))
+  (#(t-784) #(w-124) . #(t-266))
+
+(#(t-233) #(w-124) . #(t-266))
+  (#(x-71) . #(h-8))
+  (#(l) #(h-8) . #(t-784))
+  (#(t-266) n u s)
+  (#(h-820) . #(w-124))
+  (#(t-784) #(w-124) . #(t-266))
+
+(#(h-8) . b)
+  (#(t-233) #(w-124) . #(t-266))
+  (#(x-71) . #(h-8))
+  (#(l) #(h-8) . #(t-784))
+  (#(t-266) n u s)
+  (#(h-820) . #(w-124))
+  (#(t-784) #(w-124) . #(t-266))
+
+#(d-632) #(w-124) . #(t-266))
+  (#(h-681) . b) (#(h-8) . b)
+  (#(t-233) #(w-124) . #(t-266))
+  (#(x-71) . #(h-8))
+  (#(l) #(h-8) . #(t-784))
+  (#(t-266) n u s)
+  (#(h-820) . #(w-124))
+  (#(t-784) #(w-124) . #(t-266))
+
+(#(t-539) n u s)
+  (#(y-995) . #(w-124))
+  (#(d-632) #(w-124) . #(t-266))
+  (#(h-681) . b) (#(h-8) . b)
+  (#(t-233) #(w-124) . #(t-266))
+  (#(x-71) . #(h-8))
+  (#(l) #(h-8) . #(t-784))
+  (#(t-266) n u s)
+  (#(h-820) . #(w-124))
+  (#(t-784) #(w-124) . #(t-266))
+
+(#(w-124) . o)
+  (#(t-539) n u s)
+  (#(y-995) . #(w-124))
+  (#(d-632) #(w-124) . #(t-266))
+  (#(h-681) . b)
+  (#(h-8) . b)
+  (#(t-233) #(w-124) . #(t-266))
+  (#(x-71) . #(h-8))
+  (#(l) #(h-8) . #(t-784))
+  (#(t-266) n u s)
+  (#(h-820) . #(w-124))
+  (#(t-784) #(w-124) . #(t-266))
+
+'((b o n u s))

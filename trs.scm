@@ -42,7 +42,9 @@
 (define (== u v)
   (lambda (s)
     (let ((s (unify u v s)))
-      (if s `(,s) '()))))
+      (begin
+        (displayln (list 'debugging "==" "=>" s " "))
+        (if s `(,s) '())))))
 
 (define succeed
   (lambda (s)
@@ -178,7 +180,9 @@
      (define (name x ...)
        (lambda (s)
          (lambda ()
-           ((conj g ...) s)))))))
+           (begin
+             (displayln (list 'debugging name "=>" s " "))
+             ((conj g ...) s))))))))
 
 (define-syntax run
   (syntax-rules ()
@@ -198,7 +202,10 @@
   (syntax-rules ()
     ((fresh () g ...) (conj g ...))
     ((fresh (x0 x ...) g ...)
-     (call/fresh 'x_0
+     (call/fresh (string-join (list (symbol->string 'x0)
+                                    "-"
+                                    (number->string (random 1000)))
+                              "")
                  (lambda (x0)
                    (fresh (x ...) g ...))))))
 
