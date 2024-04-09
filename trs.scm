@@ -1,3 +1,4 @@
+(require debug/repl)
 ;;; Copyright © 2018 Daniel P. Friedman, William E. Byrd, Oleg Kiselyov, and Jason Hemann
 
 ;; COURSE 1
@@ -43,7 +44,7 @@
   (lambda (s)
     (let ((s (unify u v s)))
       (begin
-        (displayln (list 'debugging "==" "=>" s " "))
+        ;; (displayln (list 'debugging "==" "=>" s " "))
         (if s `(,s) '())))))
 
 (define succeed
@@ -66,6 +67,7 @@
      (cons (car s-inf)
            (append-inf (cdr s-inf) t-inf)))
     (else (lambda ()
+            ;; (debug-repl)
             (append-inf t-inf (s-inf))))))
 
 (define (take-inf n s-inf)
@@ -181,7 +183,7 @@
        (lambda (s)
          (lambda ()
            (begin
-             (displayln (list 'debugging name "=>" s " "))
+             ;; (displayln (list 'debugging name "=>" s " "))
              ((conj g ...) s))))))))
 
 (define-syntax run
