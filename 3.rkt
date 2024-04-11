@@ -72,28 +72,88 @@
 
 (run 10 x (nexto x 0))
 (run 10 x (nexto x -100))
-
-(defrel (intero x)
-        (conde
-          ((nexto x 0))
-          ((nexto x 100))
-          ((breako x))
-          ((intero x))))
-
 (run 10 x (nexto x 0))
-(run 10 x (intero x))
+
+(defrel (repeato x n)
+        (conde
+          ((== x n))
+          ((repeato x n))))
+
+(defrel (intero x n)
+        (conde
+          ((repeato x n))
+          ((repeato x (+ 1 n)))
+          ((repeato x (+ 2 n)))
+          ((intero x (+ 3 n)))))
+
+(run 30 x (intero x 0))
+
+(define-values (intero)
+  (lambda (x n)
+    (lambda (s)
+      (lambda ()
+        (#%app (#%app disj2
+                (#%app (#%top . repeato) x n)
+                (#%app disj2
+                 (#%app (#%top . repeato) x (#%app + (quote 1) n))
+                 (#%app (#%top . intero) x (#%app + (quote 2) n)))) s)))))>
+
+(defrel (intero-z x n)
+        (conde
+          ((repeato x n))
+          ((repeato x (+ 1 n)))
+          ((repeato x (+ 2 n)))))
+
+(run 20 x (intero-z x 0))
+(run 20 x (intero x 0))
+
+
+(define append-inf
+  (lambda (s-inf t-inf)
+    (cond
+      ((null? s-inf) t-inf)
+      ((pair? s-inf)
+       (cons (car s-inf)
+             (append-inf (cdr s-inf) t-inf)))
+      (else
+        (lambda ()
+          (append-inf t-inf (s-inf)))))))
 
 (defrel (intero-2 x)
         (conde
           ((nexto x 0))
           ((nexto x 100))
           ((nexto x 200))
-          ((nexto x 300))))
+          ;; ((nexto x 300))
+          ;;((nexto x 400))
+          ;;((nexto x 500))
+          ))
 
 (run 20 x (intero-2 x))
 
+(defrel (intero-3 x)
+        (conde
+          ((nexto x 0))
+          ((nexto x 100))
+          ((breako x))
+          ((nexto x 200))))
+
+(run 30 x (intero-3 x))
+
+
 (1 2 101 3 201 4   102 5   202 6   103 7   203 8   104 9   204 10  105 11)
 (1 2 101 3 4   102 5   201 6   103 7   301 8   104 9   202 10  105 11  302)
+
+;;(expand-syntax #'(...definition of intero-2...)
+(define-values (intero-2)
+  (lambda (x)
+    (lambda (s)
+      (lambda ()
+        (#%app (#%app disj2
+                (#%app nexto x (quote 0))
+                (#%app disj2
+                 (#%app nexto x (quote 100))
+                 (#%app nexto x (quote 200)))) s)))))>
 
 ;; singletono
 ;; loso
