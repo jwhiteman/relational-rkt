@@ -37,26 +37,48 @@
 ;; LOLO
 (defrel (lolo l)
         (conde
-          ((nullo l))
+          ((nullo l))         ;; a
           ((fresh (a)
              (caro l a)
-             (listo a))
+             (listo a))       ;; b
            (fresh (d)
              (cdro l d)
-             (lolo d)))))
+             (lolo d)))))     ;; c
+
+;; this seems clearer to me:
+(defrel (lolo-2 l)
+        (conde
+          ((nullo l))
+          ((fresh (a b)
+             (conso a b l)
+             (listo a)
+             (lolo-2 b)))))
 
 (run* q
   (fresh (x y)
     (lolo `((a b) (,x c) (d ,y)))))
 
-(run 3 l (lolo l))
+(run 10 l (lolo l))
+(run 20 l (lolo-2 l))
+
+;; dat interleaving:
+;; ()             ;; a
+;; (())           ;; b
+;; ((_0))         ;; b
+;; (() ())        ;; c: a
+;; ((_0 _1))      ;; b
+;; (() (_0))      ;; c: b
+;; ((_0) ())      ;; c: b
+;; (() () ())     ;; c: c: a
+;; ((_0 _1 _2))   ;; b
+;; (() (_0 _1))   ;; c: b
+
 
 (let ((l (var 'l)))
   (run-goal 3 (lolo l)))
 
 ;; investigations...
-(defrel (breako x)
-        (== x "BREAKO!"))
+(defrel (breako x) (== x "BREAKO!"))
 
 
 (defrel (rando x)
@@ -140,10 +162,6 @@
 
 (run 30 x (intero-3 x))
 
-
-(1 2 101 3 201 4   102 5   202 6   103 7   203 8   104 9   204 10  105 11)
-(1 2 101 3 4   102 5   201 6   103 7   301 8   104 9   202 10  105 11  302)
-
 ;;(expand-syntax #'(...definition of intero-2...)
 (define-values (intero-2)
   (lambda (x)
@@ -156,6 +174,21 @@
                  (#%app nexto x (quote 200)))) s)))))>
 
 ;; singletono
+(defrel (singletono l)
+        (fresh (a)
+          (== `(,a) l)))
+
 ;; loso
+(defrel (loso l)
+        (conde
+          ((nullo l))
+          ((fresh (a b)
+             (conso a b l)
+             (singletono a)
+             (loso b)))))
+
+(run 5 l (loso l))
+(run 5 x (loso (list 42 x)))  ;; 14 fails singletono
+
 ;; membero
 ;; proper-membero
