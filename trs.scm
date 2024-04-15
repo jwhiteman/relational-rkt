@@ -1,4 +1,4 @@
-(require debug/repl)
+;; (require debug/repl) - needs raco?
 ;;; Copyright © 2018 Daniel P. Friedman, William E. Byrd, Oleg Kiselyov, and Jason Hemann
 
 ;; COURSE 1

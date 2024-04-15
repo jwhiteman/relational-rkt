@@ -111,9 +111,9 @@
 (run 30 x (intero x 0))
 
 (define-values (intero)
-  (lambda (x n)
-    (lambda (s)
-      (lambda ()
+  (λ (x n)
+    (λ (s)
+      (λ ()
         (#%app (#%app disj2
                 (#%app (#%top . repeato) x n)
                 (#%app disj2
@@ -164,9 +164,9 @@
 
 ;;(expand-syntax #'(...definition of intero-2...)
 (define-values (intero-2)
-  (lambda (x)
-    (lambda (s)
-      (lambda ()
+  (λ (x)
+    (λ (s)
+      (λ ()
         (#%app (#%app disj2
                 (#%app nexto x (quote 0))
                 (#%app disj2
